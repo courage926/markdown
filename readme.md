@@ -1,5 +1,5 @@
 # readme.md
 ```
-public
+note about learning javaEE javaWeb frame like Mybatis,Spring,SpringMVC and so on...
 
 ```
