@@ -86,21 +86,79 @@ admin=123
 3.在返回的认证信息中拿到凭证去匹配token中的密码看是否一致,
   返回IncorrectCredentials/认证成功
 ```
+
 ### 自定义Realm
+1. 继承AuthorizingRealm
+2. 覆写 doGetAuthenticationInfo方法
+```
+//获取用户账号
+//通过用户账号查询真实的用户信息
+//如果账号正确,返回返回一个AuthenticationInfo对象
+//否则返回null;
+```
+3. 覆写doGetAuthorizationInfo方法
+```
+待...
+暂时返回null
+```
+
 ### 集成CRM项目
 1. web.xml中配置代理过滤器
-2. shiro.xml配置代理过滤器.安全管理器
+2. shiro.xml配置代理过滤器.安全管理器,引入到mvc.xml
+
 ### shiro默认的过滤器
 细化shiro的配置与拦截器路径
-
+```
+<bean id="shiroFilter"
+         class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+       <!--引用指定的安全管理器-->
+       <property name="securityManager" ref="securityManager"/>
+       <!--指定登陆的路径-->
+       <property name="loginUrl" value="/login.html"/>
+       <property name="filterChainDefinitions">
+           <value>
+               /js/**=anon
+               /images/**=anon
+               /css/**=anon
+               /logout.do=logout
+               /**=authc
+           </value>
+       </property>
+       <property name="filters">
+           <map>
+               <entry key="authc" value-ref="crmFormAuthenticationFilter"/>
+           </map>
+       </property>
+   </bean>
+   <bean id="securityManager"
+         class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+       <property name="realm" ref="crmRealm"/>
+   </bean>
+```
 ## 登录页面改动
 1. 引入jquery.form插件
 2. 修改表单提交的地址为/login.html
 3. 点击登录按钮提交表单
-4. 以上两个方法的返回值都是表示是否放行到shiro的下一个过滤器,true表示放行,false表示不放行
-在ajax请求中,只需要把JSON的数据写回给客户端即可,所以都不需要再放行了
+4. 只需要把JSON的数据写回给客户端即可,所以都不需要再放行了
 5. 重新配置认证过滤器
+6. 增加注销  
+shiro.xml:
 ```
-增加注销
-覆盖系统默认的过滤器
+  /logout.do=logout
+```
+navbar.ftl:
+```
+<a href="/logout.do">
+  <i class="fa fa-power-off"></i>
+  注销
+</a>
+```
+7. 覆盖系统默认的过滤器  
+shiro.xml:
+```
+<property name="filters">
+            <map>
+                <entry key="authc" value-ref="crmFormAuthenticationFilter"/>
+            </map>
+</property>
 ```
